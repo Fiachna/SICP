@@ -329,4 +329,30 @@ square 5
 (sqrt 0.000001)
 ;Value: 1.0000001533016628e-3
 
+(define (square x) (* x x))
+;Value: square
 
+(define (good-enough? guess prev-guess)
+  (< (/ (abs (- guess prev-guess))
+	guess)
+     0.001))
+;Value: good-enough?
+
+(define (improve guess x)
+  (/ (+ (/ x (square guess)) (* 2 guess)) 3))
+;Value: improve
+
+(define (cubert-iter guess prev-guess x)
+  (if (good-enough? guess prev-guess)
+      guess
+      (cubert-iter (improve guess x)
+		   guess
+		   x)))
+;Value: cubert-iter
+
+(define (cubert x)
+  (cubert-iter 1.0 0.0 x))
+;Value: cubert
+
+(cubert 8)
+;Value: 2.000000000012062
