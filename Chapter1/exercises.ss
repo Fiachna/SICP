@@ -356,3 +356,179 @@ square 5
 
 (cubert 8)
 ;Value: 2.000000000012062
+
+(define (average x y)
+  (/ (+ x y) 2))
+;Value: average
+
+(define (sqrt x)
+  (define (good-enough? guess x)
+    (< (abs (- (square guess) x)) 0.001))
+  (define (improve guess x)
+    (average guess (/ x guess)))
+  (define (sqrt-iter guess x)
+    (if (good-enough? guess x)
+	guess
+	(sqrt-iter (improve guess x) x)))
+  (sqrt-iter 1.0 x))
+;Value: sqrt
+
+(define (sqrt x)
+  (define (good-enough? guess)
+    (< (abs (- (square guess) x)) 0.001))
+  (define (improve guess)
+    (average guess (/ x guess)))
+  (define (sqrt-iter guess)
+    (if (good-enough? guess)
+	guess
+	(sqrt-iter (improve guess))))
+  (sqrt-iter 1.0))
+;Value: sqrt
+
+(sqrt 4)
+;Value: 2.0000000929222947
+
+(define (factorial n)
+  (if (= n 1)
+      1
+      (* n (factorial (- n 1)))))
+;Value: factorial
+
+(factorial 6)
+;Value: 720
+
+(define (fact-iter product counter max-count)
+  (if (> counter max-count)
+      product
+      (fact-iter (* counter product)
+		 (+ counter 1)
+		 max-count)))
+;Value: fact-iter
+
+(define (factorial n)
+  (fact-iter 1 1 n))
+;Value: factorial
+
+(factorial 6)
+;Value: 720
+
+; The expansion of (+ a b) as described in 1.9 will proceed as follows
+; (+ 3 5) ;; a, 3 here, is not equal to 0 so it begins recursing
+; (inc (+ 2 5))
+; (inc (inc ( + 1 5)))
+; (inc (inc (inc (+ 0 5)))) ;; at this point a == 0 so contraction can begin
+; (inc (inc 6))
+; (inc 7)
+; 8
+; This process is recursive
+
+; For the second form provided the expansion proceeds as follows
+; (+ 3 5)
+; (+ 2 6) ;; decrement a, increment b
+; (+ 1 7)
+; (+ 0 8)
+; 8
+; This process is iterative
+
+(define (Ackermans x y)
+  (cond ((= y 0) 0)
+	((= x 0) (* 2 y))
+	((= y 1) 2)
+	(else (Ackermans (- x 1)
+			 (Ackermans x (- y 1))))))
+;Value: ackermans
+
+; For (Ackermans 1 10) the expansion is as follows
+; (Ackermans 1 10) ; doesn't match any end conditions, falls into the else block
+; (Ackermans 0 (Ackermans 1 9)) ; evaluates the second call first, so it won't hit the condition where x == 0
+; (Ackermans 0 (Ackermans 0 (Ackermans 1 8)))
+; (Ackermans 0 (Ackermans 0 (Ackermans 0 (Ackermans 1 7))))
+; (Ackermans 0 (Ackermans 0 (Ackermans 0 (Ackermans 0 (Ackermans 1 6)))))
+; ...
+; (* 2 (* 2 (* 2 (* 2 (* 2 (* 2 (* 2 (* 2 (* 2 (2))))))))))
+; As you can see this function raises 2^10 in this case
+
+(Ackermans 1 10)
+;Value: 1024
+
+; In the second instance the expansion will follow:
+; (Ackermans 2 4) ;; no end conditions met
+; (Ackermans 1 (Ackermans 2 3))
+; (Ackermans 1 (Ackermans 1 (Ackermans 2 2)))
+; (Ackermans 1 (Ackermans 1 (Ackermans 1 (Ackermans 2 1)))) ;;some contraction begins here as y == 1 triggers an end condition
+; (Ackermans 1 (Ackermans 1 (Ackermans 1 2))) ;; expansion starts again
+; (Ackermans 1 (Ackermans 1 (Ackermans 0 (Ackermans 1 1))))
+; (Ackermans 1 (Ackermans 1 (Ackermans 0 2)
+; (Ackermans 1 (Ackermans 1 4))
+; (Ackermans 1 (Ackermans 0 (Ackermans 1 3)))
+; (Ackermans 1 (Ackermans 0 (Ackermans 0 (Ackermans 1 2))))
+; (Ackermans 1 (Ackermans 0 (Ackermans 0 (Ackermans 0 (Ackermans 1 1)))))
+; (Ackermans 1 (Ackermans 0 (Ackermans 0 (Ackermans 0 2))))
+; (Ackermans 1 (* 2 (* 2 (* 2 2))))
+; (Ackermans 1 16)
+; ...
+; 2^16
+
+(Ackermans 2 4)
+;Value: 65536
+
+; This one's a bit hairy to manually expand so lets just let emacs do it for me
+(Ackermans 3 3)
+;Value: 65536
+
+(Ackermans 3 2)
+;Value: 4
+
+(Ackermans 3 1)
+;Value: 2
+
+(define (f n) (Ackermans 0 n))
+;Value: f
+
+(f 0)
+;Value: 0
+
+(f 1)
+;Value: 2
+
+(f 2)
+;Value: 4
+
+; (f n) == 2n
+
+(define (g n) (Ackermans 1 n))
+;Value: g
+
+(g 0)
+;Value: 0
+
+(g 1)
+;Value: 2
+
+(g 2)
+;Value: 4
+
+(g 3)
+;Value: 8
+
+; (g n) as seen above will be 2^n, except in the case of 0 where it will be 0
+
+(define (h n) (Ackermans 2 n))
+;Value: h
+
+(h 0)
+;Value: 0
+
+(h 1)
+;Value: 2
+
+(h 2)
+;Value: 4
+
+(h 3)
+;Value: 16
+
+(h 4)
+;Value: 65536
+
+; (h n) == 2 ^ (h(n-1)), (h 1) = 2, (h 0) = 0
